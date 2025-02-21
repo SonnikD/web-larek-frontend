@@ -32,8 +32,6 @@
 - `src/utils/` — вспомогательные утилиты
 - `src/scss/` — стили проекта
 
----
-
 ## Важные файлы
 
 - `src/pages/index.html` — HTML-файл главной страницы
@@ -59,8 +57,6 @@ npm run start
 yarn
 yarn start
 ```
-
----
 
 ## Сборка
 
