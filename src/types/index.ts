@@ -1,5 +1,5 @@
 // Интерфейс модели данных приложения
-interface IAppState { 
+interface IAppData { 
   catalog: IProduct[];
   basket: IProduct[];
   order: IOrder;
@@ -73,7 +73,7 @@ catalog: ICatalog;
 }
 
 export {
-  IAppState, IProduct, ICatalog, IBasket, IOrderForm, PaymentType, 
+  IAppData, IProduct, ICatalog, IBasket, IOrderForm, PaymentType, 
   IContactsForm, IOrder, IOrderSuccess, IApiError, FormErrorsType, IPage
 }
 
