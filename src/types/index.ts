@@ -1,7 +1,7 @@
 // Интерфейс модели данных приложения
 interface IAppState { 
-  catalog: IProductList;
-  basket: IBasket;
+  catalog: IProduct[];
+  basket: IProduct[];
   order: IOrder;
   formErrors: FormErrorsType;
 }
@@ -16,17 +16,21 @@ interface IProduct {
   price: number;
 }
 
-// Интерфейс каталога товаров
-interface IProductList {
-  items: IProduct[];
-  totalProducts: number;
+// Общий интерфейс для работы с товаром
+interface IProductContainer {
+  items: IProduct[]; 
 }
 
-// Интерфейс корзины товаров
-interface IBasket {
-  items: IProduct[];
-  totalPrice: number
+// Интерфейс для каталога товаров
+interface ICatalog extends IProductContainer {
+  totalProducts: number; 
 }
+
+// Интерфейс для корзины 
+interface IBasket extends IProductContainer {
+  totalPrice: number; 
+}
+
 
 // Интерфейс формы заказа
 interface IOrderForm {
@@ -65,11 +69,16 @@ type FormErrorsType = Partial<Record<keyof IOrder, string>>;
 // Интерфейс главной страницы
 interface IPage {
 countBasket: number;
-catalog: IProductList;
+catalog: ICatalog;
 }
 
 export {
-  IAppState, IProduct, IProductList, IBasket, IOrderForm, PaymentType, 
+  IAppState, IProduct, ICatalog, IBasket, IOrderForm, PaymentType, 
   IContactsForm, IOrder, IOrderSuccess, IApiError, FormErrorsType, IPage
 }
+
+
+
+
+
 
