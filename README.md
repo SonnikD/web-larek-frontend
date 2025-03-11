@@ -94,16 +94,16 @@ yarn build
 
 ### **Класс`Component`**
 
-Абстрактный базовый класс, предназначенным для создания компонентов пользовательского интерфейса. Он предоставляет общие методы для управления DOM-элементами. **Наследуется** всеми классами представления (`View`).
+Абстрактный базовый класс, предназначенный для создания компонентов пользовательского интерфейса. Он предоставляет общие методы для управления DOM-элементами. **Наследуется** всеми классами представления (`View`).
 
 **Методы:**
 
-- `setText(text: string): void` — установить текстовое содержание для компонента;
-- `setImage(src: string, alt?: string): void` — установить изображение компонента;
-- `setHidden(): void` — скрыть компонент;
-- `setVisible(): void` — отобразить компонент;
+- `setText(element: HTMLElement, text: string): void` — установить текстовое содержание для компонента;
+- `setImage(element: HTMLElement, src: string, alt?: string): void` — установить изображение компонента;
+- `setHidden(element: HTMLElement): void` — скрыть компонент;
+- `setVisible(element: HTMLElement): void` — отобразить компонент;
 - `toggleClass(className: string): void` — добавить или удалить класс, в зависимости от текущего состояния;
-- `render(): HTMLElement` — вернуть DOM-элемент, переданный в конструкторе.
+- `render((data?: Partial<T>): HTMLElement` — вернуть DOM-элемент, переданный в конструкторе.
 
 **Конструктор:**
 
@@ -162,21 +162,41 @@ yarn build
 - `basket: IProduct[]` — массив объектов типа IProduct, который содержит товары, добавленные в корзину;
 - `order: IOrder` — объект, который содержит данные о заказе;
 - `formErrors: FormErrorsType` — объект, содержащий ошибки формы;
+- `preview: IProduct` — объект, который содержит товар, выбранный для предварительного просмотра
 
 **Методы:**
 
 - `addToBasket(item: IProduct): void` — добавить в корзину;
 - `removeFromBasket(item: IProduct): void` — удалить из корзины;
 - `clearBasket(): void` — очистить корзину;
+- `isInBasket(product: IProduct): boolean` — проверить есть ли товар в корзине;
 - `setCatalog(products: IProduct[]): void` — загружает список товаров;
-- `setContactsForm(data: IContactsForm): void` — сохранить контактные данные из формы;
-- `setOrderForm(orderData: IOrderForm): void` — сохранить данные формы заказа;
-- `validateOrder(): boolean` — проверить корректность заполнения формы;
+- `setContactsForm(field: keyof IContactsForm, value: string): void` — сохранить контактные данные из формы;
+- `setOrderForm(field: keyof IOrderForm, value: string): void` — сохранить данные формы заказа;
+- `validateOrder(): boolean` — проверить корректность заполнения формы заказа;
+- `validateContacts(): boolean` — проверить корректность заполнения формы с контактными данными;
 - `clearOrder(): void` — очистить объект заказа;
 - `getTotal(): number` — вычислить общую сумму товаров в корзине;
 
 **Конструктор:**
 `constructor(protected events: IEvents)` — создать объект, с переданными брокером события;
+
+### **Класс`WebLarekApi`**
+
+Класс представляет методы для взаимодействия с API приложения. **Наследуется** от `Api`
+
+**Поля:**
+
+- `cdn: string` — URL адрес, по которому будут скачиваться все файлы;
+
+**Методы:**
+
+- `getProductList(): Promise<IProduct[]>` — получить список товаров с сервера;
+- `getProduct(id: string): Promise<IProduct>` — получить товар по его id;
+- `postOrder(order: IOrder): Promise<IOrderSuccess>` — отправить заказ на сервер;
+
+**Конструктор:**
+`constructor(cdn: string, baseUrl: string, options: RequestInit = {})` — создать объект, который расширяет базовый API-класс, добавляя поддержку CDN для работы с изображениями или файлами;
 
 ## Слой View (общие классы)
 
@@ -186,14 +206,18 @@ yarn build
 
 **Поля:**
 
-- `_closeButton: HTMLButtonElement` — кнопка закрытия модального окна;
-- `_content: HTMLElement` — элемент, который содержит контент модального окна;
+- `closeButton: HTMLButtonElement` — кнопка закрытия модального окна;
+- `content: HTMLElement` — элемент, который содержит контент модального окна;
+
+**Свойства-аксессоры:**
+
+- `set locked(value: boolean)` — сеттер, который отвечает за блокировку прокрутки страницы
 
 **Методы:**
 
-- `openModal(content: HTMLElement): void` — открыть модальное окно;
+- `openModal(): void` — открыть модальное окно;
 - `closeModal(): void` — закрыть модальное окно;
-- `renderModal(content: HTMLElement): void` — настроить структуру и содержимое формы.
+- `renderModal(data: IModalData): HTMLElement` — настроить структуру и содержимое формы.
 
 **Конструктор:**
 `constructor(container: HTMLElement, protected events: IEvents)` — создать экземпляр класса, с переданными брокером события и DOM-элементом;
@@ -202,20 +226,23 @@ yarn build
 
 Класс отвечает за реализацию формы. **Наследуется** от `Component`
 
+**Класс реализует интерфейс**: `IFormValid`
+
 **Поля:**
 
-- `_submitForm: HTMLButtonElement` — кнопка отправки формы;
-- `_errors: HTMLElement` — элемент, в котором будут отображаться ошибки формы;
+- `submitForm: HTMLButtonElement` — кнопка отправки формы;
+- `errors: HTMLElement` — элемент, в котором будут отображаться ошибки формы;
 
 **Свойства-аксессоры:**
 
-- `set valid(isValid: boolean): void` — сеттер, который отключает кнопку форму, в случае невалидности;
-- `set errors(errors: string[]): void` — сеттер, который изменяет форму, показывая ошибки.
+- `set valid(isValid: boolean)` — сеттер, который отключает кнопку форму, в случае невалидности;
+- `set errors(errors: string[])` — сеттер, который изменяет форму, показывая ошибки.
 
 **Методы:**
 
-- `onInputChange(event: EmitterEvent): void` — слушать изменения в полях формы;
-- `renderForm(content: HTMLElement): void` — настроить структуру и содержимое формы.
+- `onInputChange(field: keyof T, value: string): void` — слушать изменения в полях формы;
+- `renderForm(content: HTMLElement)` — настроить структуру и содержимое формы.
+- `updateField(field: keyof T, value: string)` — обновлять значения полей формы.
 
 **Конструктор:**
 `constructor(protected container: HTMLFormElement, protected events: IEvents)` — создать экземпляр класса, с переданной формой и брокером события;
@@ -224,37 +251,21 @@ yarn build
 
 Класс для отображения модального окна успешного оформления заказа. Наследуется от `Component`.
 
-**Класс реализует интерфейс**: `IOrderSuccess`
+**Класс реализует интерфейс**: `ISuccess`
 
-**Поля:**
+**Свойства-аксессоры:**
+
+- `set total(value: number)` — сеттер, который устанавливает число списанных синапсов на элемент
+
+- **Поля:**
 
 - `id: string` — идентификатор заказа;
 - `totalPrice: number` — общая стоимость заказа;
 
 **Конструктор:**
-`constructor (container: HTMLElement, events: IEvents, actions: ISuccessActions)` — создать экземпляр класса успешного оформления заказа, который будет отображать подтверждение заказа, обрабатывать события и выполнять переданные действия.
+`constructor (container: HTMLElement, events: IEvents)` — создать экземпляр класса успешного оформления заказа, который будет отображать подтверждение заказа, обрабатывать события.
 
 ## Слой View (проектные классы)
-
-### **Класс`Page`**
-
-Класс отвечает за реализацию главной страницы. **Наследуется** от `Component`
-
-**Класс реализует интерфейс**: `IPage`
-
-**Поля:**
-
-- `countBasket: number` — поле-счетчик, хранит количество товаров в корзине;
-- `catalog: ICatalog` — поле представляет каталог товаров;
-
-**Свойства-аксессоры:**
-
-- `set countBasket(count: number): void` — сеттер, устанавливает значение счетчика в корзине;
-- `set catalog(items: HTMLElement[]): void` — сеттер, который устанавливает массив элементов HTML, представляющих товары в каталоге;
-- `set locked(value: boolean): void` — сеттер, который устанавливает или снимает блокировку страницы.
-
-**Конструктор:**
-`constructor(container: HTMLElement, events: IEvents)` — создать экземпляр класса, с переданными брокером события и DOM-элементом;
 
 ### **Класс`Card`**
 
@@ -273,15 +284,16 @@ yarn build
 
 **Свойства-аксессоры:**
 
-- `set id(id: string): void` — сеттер, который устанавливает id карточки;
-- `set title(title: string): void` — сеттер, который меняет содержимое заголовка на полученное;
-- `set description(description: string): void` — сеттер, который меняет содержимое контейнера с описанием на полученное;
-- `set image(imageUrl: string): void` — сеттер, который меняет изображение в карточке;
-- `set category(category: string): void` — сеттер, который меняет содержимое контейнера с категорией на полученное;
-- `set price(price: number): void` — сеттер, который меняет содержимое заголовка на полученное;
+- `set id(id: string)` — сеттер, который устанавливает id карточки;
+- `set title(title: string)` — сеттер, который меняет содержимое заголовка на полученное;
+- `set description(description: string)` — сеттер, который меняет содержимое контейнера с описанием на полученное;
+- `set image(imageUrl: string)` — сеттер, который меняет изображение в карточке;
+- `set category(category: string)` — сеттер, который меняет содержимое контейнера с категорией на полученное;
+- `set price(price: number)` — сеттер, который меняет содержимое заголовка на полученное;
+- `set button(text: string)` — сеттер, который устанавливает тестовое содержимое кнопке;
 
 **Конструктор:**
-`constructor(container: HTMLElement, actions?: ICardActions)` — создать экземпляр класса, с переданными брокером события и опционально с добавить обработчик событий;
+`constructor(container: HTMLElement, actions?: ICardActions)` — создать экземпляр класса, с переданными брокером события и контейнером;
 
 ### **Класс`Basket`**
 
@@ -291,19 +303,19 @@ yarn build
 **Поля:**
 
 - `items: IProduct[]` — список товаров, добавленных в корзину;
-- `totalPrice: number` — общая стоимость всех товаров в корзине;
 
 **Свойства-аксессоры:**
 
-- `set items(items: HTMLElement[]): void` — сеттер, который устанавливает товары в корзине;
-- `set totalPrice(totalPrice: number): void` — сеттер, который устанавливает и отображает общую стоимость товаров в корзине.
+- `set items(items: HTMLElement[])` — сеттер, который устанавливает товары в корзине;
+- `set total(total: number)` — сеттер, который устанавливает общую цену товаров в корзине;
+- `set counter(count: number)` — сеттер, который устанавливает счётчик в корзине;
 
 **Конструктор:**
-`constructor(protected events: IEvents)` — создать экземпляр класса, с переданными брокером события;
+`constructor (container: HTMLElement, events: IEvents)` — создать экземпляр класса, с переданными брокером события;
 
 ### **Класс`OrderForm`**
 
-Класс реализует форму заказа. **Наследуется** от `Component`.
+Класс реализует форму заказа. **Наследуется** от `Form`.
 
 **Класс реализует интерфейс**: `IOrderForm`
 
@@ -311,18 +323,23 @@ yarn build
 
 - `paymentMethod: PaymentType` — способ оплаты для заказа (online/onDelivery);
 - `address: string` — адрес доставки заказа;
+- `onlineInput: HTMLButtonElement` — HTMLButtonElement способа оплаты "Онлайн";
+- `onDeliveryInput: HTMLButtonElement` — HTMLButtonElement способа оплаты "При получении";
+- `addressInput: HTMLInputElement` — HTMLInputElement адреса доставки;
 
-**Свойства-аксессоры:**
+  **Свойства-аксессоры:**
 
-- `set paymentMethod(paymentMethod: PaymentType)` — сеттер, который изменяет классы кнопок, чтобы визуально отобразить текущий выбор;
-- `set address(address: string): void` — сеттер, который устанавливает адрес доставки.
+- `set paymentMethod(value: PaymentType)` — сеттер, который изменяет классы кнопок, чтобы визуально отобразить текущий выбор;
+- `set address(address: string)` — сеттер, который устанавливает адрес доставки.
+- `get address()` — геттер, который возвращает адрес доставки.
+- `get paymentMethod()` — геттер, который возвращает способ оплаты.
 
 **Конструктор:**
 `constructor(container: HTMLFormElement, events: IEvents)` — создать экземпляр класса, и привязать его к HTML-элементу (форме) с переданным брокером событием;
 
 ### **Класс`ContactsForm`**
 
-Класс реализует форму с контактными данными. **Наследуется** от `Component`.
+Класс реализует форму с контактными данными. **Наследуется** от `Form`.
 
 **Класс реализует интерфейс**: `IContactsForm`
 
@@ -330,18 +347,20 @@ yarn build
 
 - `email: string` — электронная почта пользователя;
 - `phone: string` — номер телефона пользователя;
+- `emailInput: HTMLInputElement` — HTMLInputElement электронной почты пользователя;
+- `phoneInput: HTMLInputElement` — HTMLInputElement номера телефона пользователя;
 
 **Свойства-аксессоры:**
 
-- `set email(email: string): void` — сеттер, который устанавливает электронную почту;
-- `set phone(phone: string): void` — сеттер, который устанавливает номер телефона.
+- `set email(email: string)` — сеттер, который устанавливает электронную почту;
+- `set phone(phone: string)` — сеттер, который устанавливает номер телефона.
 
 **Конструктор:**
 `constructor(container: HTMLFormElement, events: IEvents)` — создать экземпляр класса, и привязать его к HTML-элементу (форме) с переданным брокером событием;
 
 ## Presenter
 
-Управляет взаимодействием компонентов и координирует логику приложения. Само взаимодействие происходит за счет брокера событий (`EventEmitter`), который их отслеживает.
+Код, который управляет взаимодействием компонентов и координирует логику приложения находится в `index.ts`. Само взаимодействие происходит за счет брокера событий (`EventEmitter`), который их отслеживает.
 
 ## Программный интерфейс
 
@@ -353,6 +372,9 @@ interface IAppData {
 	basket: IProduct[];
 	order: IOrder;
 	formErrors: FormErrorsType;
+	preview: IProduct;
+	setCatalog(products: IProduct[]): void;
+	setPreview(product: IProduct): void;
 }
 ```
 
@@ -377,20 +399,16 @@ interface IProductContainer {
 }
 ```
 
-### Интерфейс каталога товаров
+### Интерфейс каталога товаров, полученного с сервера
 
 ```ts
-interface ICatalog extends IProductContainer {
-	totalProducts: number;
-}
+interface ICatalog extends IProductContainer {}
 ```
 
 ### Интерфейс корзины
 
 ```ts
-interface IBasket extends IProductContainer {
-	totalPrice: number;
-}
+interface IBasket extends IProductContainer {}
 ```
 
 ### Интерфейс формы с контактными данными
@@ -411,11 +429,12 @@ interface IOrderForm {
 }
 ```
 
-### Интерфейс заказа
+### Интерфейс заказа, для отправки на сервер
 
 ```ts
 interface IOrder extends IOrderForm, IContactsForm {
-	totalPrice: number;
+	total: number;
+	items: string[];
 }
 ```
 
@@ -425,15 +444,6 @@ interface IOrder extends IOrderForm, IContactsForm {
 interface IOrderSuccess {
 	id: string;
 	totalPrice: number;
-}
-```
-
-### Интерфейс главной страницы
-
-```ts
-interface IPage {
-	countBasket: number;
-	catalog: ICatalog;
 }
 ```
 

@@ -4,6 +4,19 @@ interface IAppData {
   basket: IProduct[];
   order: IOrder;
   formErrors: FormErrorsType;
+  preview: IProduct;
+  addToBasket(item: IProduct): void
+  removeFromBasket(item: IProduct): void
+  clearBasket(): void 
+  getTotal(): number
+  setContatcsForm(field: keyof IContactsForm, value: string): void
+  setOrderForm(field: keyof IOrderForm, value: string): void 
+  setCatalog(products: IProduct[]): void 
+  setPreview(product: IProduct): void
+  validateOrder(): boolean
+  validateContacts(): boolean 
+  clearOrder(): void 
+  isInBasket(product: IProduct): boolean
 }
 
 // Интерфейс товара
@@ -22,19 +35,15 @@ interface IProductContainer {
 }
 
 // Интерфейс для каталога товаров
-interface ICatalog extends IProductContainer {
-  totalProducts: number; 
-}
+interface ICatalog extends IProductContainer {}
 
 // Интерфейс для корзины 
-interface IBasket extends IProductContainer {
-  totalPrice: number; 
-}
+interface IBasket extends IProductContainer {}
 
 
 // Интерфейс формы заказа
 interface IOrderForm {
-  paymentMethod: PaymentType;
+  payment: PaymentType;
   address: string;
 }
 
@@ -47,15 +56,16 @@ interface IContactsForm {
   phone: string;
 }
 
-// Интерфейс заказа
+// Интерфейс заказа, для отправки на сервер
 interface IOrder extends IOrderForm, IContactsForm {
-  totalPrice: number;
+  total: number;
+  items: string[]
 }
 
 // Интерфейс успешного ответа сервера при оформлении заказа
 interface IOrderSuccess {
   id: string;
-  totalPrice: number;
+  total: number;
 }
 
 // Интерфейс ошибки сервера 
@@ -66,15 +76,9 @@ interface IApiError {
 // Тип ошибки в форме при заполнении
 type FormErrorsType = Partial<Record<keyof IOrder, string>>;
 
-// Интерфейс главной страницы
-interface IPage {
-countBasket: number;
-catalog: ICatalog;
-}
-
 export {
   IAppData, IProduct, ICatalog, IBasket, IOrderForm, PaymentType, 
-  IContactsForm, IOrder, IOrderSuccess, IApiError, FormErrorsType, IPage
+  IContactsForm, IOrder, IOrderSuccess, IApiError, FormErrorsType
 }
 
 
