@@ -1,14 +1,7 @@
-import { IProduct, IOrder, IOrderSuccess } from "../../types";
+import { IProduct, IOrderSuccess, IOrderRequest, IWebLarekApi } from "../../types";
 import { Api, ApiListResponse } from "../base/api";
 
 // Класс представляет методы для взаимодействия с API приложения.
-
-interface IWebLarekApi {
-  cdn: string;
-  getProductList(): Promise<IProduct[]>;
-  getProduct(id: string): Promise<IProduct>;
-  postOrder(order: IOrder): Promise<IOrderSuccess>;
-}
 
 export class WebLarekApi extends Api implements IWebLarekApi {
   cdn: string;
@@ -38,7 +31,7 @@ export class WebLarekApi extends Api implements IWebLarekApi {
   }
 
   // Отправить сформированный заказ на сервер
-  postOrder(order: IOrder): Promise<IOrderSuccess> {
+  postOrder(order: IOrderRequest): Promise<IOrderSuccess> {
      return this.post('/order', order).then((result: IOrderSuccess) => result)
   }
 }

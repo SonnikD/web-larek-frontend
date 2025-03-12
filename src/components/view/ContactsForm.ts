@@ -15,9 +15,6 @@ export class ContactsForm extends Form<IContactsForm> {
     
     this._emailInput = ensureElement<HTMLInputElement>('.form__input[name=email]', this.container)
     this._phoneInput = ensureElement<HTMLInputElement>('.form__input[name=phone]', this.container)
-
-    this.email = this._emailInput.value;
-    this.phone = this._phoneInput.value;
   }
 
   set email(email: string) {

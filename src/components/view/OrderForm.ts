@@ -6,50 +6,36 @@ import { Form } from "./Form";
 // Класс реализует форму заказа
 
 export class OrderForm extends Form<IOrderForm> {
-  private _paymentMethod: PaymentType = 'online'; 
-  private _address: string = ''; 
 
-  protected onlineButton: HTMLButtonElement;
-  protected onDeliveryButton: HTMLButtonElement;
-  protected addressInput: HTMLInputElement;
+  protected _onlineButton: HTMLButtonElement;
+  protected _onDeliveryButton: HTMLButtonElement;
+  protected _addressInput: HTMLInputElement;
 
   constructor(container: HTMLFormElement, events: IEvents) {
     super(container, events);
 
-    this.onlineButton = ensureElement<HTMLButtonElement>('.button[name=card]', this.container);
-    this.onDeliveryButton = ensureElement<HTMLButtonElement>('.button[name=cash]', this.container);
-    this.addressInput = ensureElement<HTMLInputElement>('.form__input[name=address]', this.container);
-    this.toggleClass(this.onlineButton, 'button_alt-active');
+    this._onlineButton = ensureElement<HTMLButtonElement>('.button[name=card]', this.container);
+    this._onDeliveryButton = ensureElement<HTMLButtonElement>('.button[name=cash]', this.container);
+    this._addressInput = ensureElement<HTMLInputElement>('.form__input[name=address]', this.container);
+    this.toggleClass(this._onlineButton, 'button_alt-active');
 
-    this.address = this.addressInput.value;
+    this.address = this._addressInput.value;
 
-    this.onlineButton.addEventListener('click', () => {
-      this.paymentMethod = 'online';
+    this._onlineButton.addEventListener('click', () => {
       this.onInputChange('payment', 'online');
     });
     
-    this.onDeliveryButton.addEventListener('click', () => {
-      this.paymentMethod = 'onDelivery';
+    this._onDeliveryButton.addEventListener('click', () => {
       this.onInputChange('payment', 'onDelivery');
     });
-    
-  }
-
-  get paymentMethod() {
-    return this._paymentMethod; 
   }
 
   set paymentMethod(value: PaymentType) {
-    this._paymentMethod = value; 
-    this.toggleClass(this.onlineButton, 'button_alt-active', value === 'online');
-    this.toggleClass(this.onDeliveryButton, 'button_alt-active', value === 'onDelivery');
+    this.toggleClass(this._onlineButton, 'button_alt-active', value === 'online');
+    this.toggleClass(this._onDeliveryButton, 'button_alt-active', value === 'onDelivery');
   }
 
   set address(address: string) {
-    this._address = address
-  }
-
-  get address() {
-    return this._address;
+    this._addressInput.value = address
   }
 }

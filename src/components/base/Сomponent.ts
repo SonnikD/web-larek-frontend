@@ -42,6 +42,15 @@ export abstract class Component<T> {
     }
   }
 
+  // Переключить атрибут disabled на элементе
+  toggleDisabled(element: HTMLElement, state: boolean): void {
+    if (state) {
+      element.setAttribute('disabled', 'disabled')
+    } else {
+      element.removeAttribute('disabled')
+    }
+  }
+
   // Вернуть DOM-элемент, переданный в конструкторе
   render(data?: Partial<T>): HTMLElement {
     Object.assign(this as object, data ?? {});

@@ -1,10 +1,11 @@
 // Интерфейс модели данных приложения
 interface IAppData { 
   catalog: IProduct[];
-  basket: IProduct[];
-  order: IOrder;
+  basket: string[];
+  order: IOrderDetails;
   formErrors: FormErrorsType;
   preview: IProduct;
+  
   addToBasket(item: IProduct): void
   removeFromBasket(item: IProduct): void
   clearBasket(): void 
@@ -19,6 +20,14 @@ interface IAppData {
   isInBasket(product: IProduct): boolean
 }
 
+// Интерфейс представляет методы для взаимодействия с API приложения
+interface IWebLarekApi {
+  cdn: string;
+  getProductList(): Promise<IProduct[]>;
+  getProduct(id: string): Promise<IProduct>;
+  postOrder(order: IOrderRequest): Promise<IOrderSuccess>;
+}
+
 // Интерфейс товара
 interface IProduct {
   id: string;
@@ -28,18 +37,6 @@ interface IProduct {
   category: string;
   price: number;
 }
-
-// Общий интерфейс для работы с товаром
-interface IProductContainer {
-  items: IProduct[]; 
-}
-
-// Интерфейс для каталога товаров
-interface ICatalog extends IProductContainer {}
-
-// Интерфейс для корзины 
-interface IBasket extends IProductContainer {}
-
 
 // Интерфейс формы заказа
 interface IOrderForm {
@@ -56,15 +53,29 @@ interface IContactsForm {
   phone: string;
 }
 
+// Интерфейс валидности формы
+interface IFormValid {
+  valid: boolean;
+  errors: string[];
+}
+
+// Интерфейс деталей заказа, собранных с полей форм
+interface IOrderDetails extends IOrderForm, IContactsForm {}
+
 // Интерфейс заказа, для отправки на сервер
-interface IOrder extends IOrderForm, IContactsForm {
-  total: number;
-  items: string[]
+interface IOrderRequest extends IOrderForm, IContactsForm {
+  items: string[],
+  total: number
 }
 
 // Интерфейс успешного ответа сервера при оформлении заказа
 interface IOrderSuccess {
   id: string;
+  total: number;
+}
+
+// Интерфейс модального окна успешного оформления заказа
+interface ISuccess {
   total: number;
 }
 
@@ -74,11 +85,28 @@ interface IApiError {
 }
 
 // Тип ошибки в форме при заполнении
-type FormErrorsType = Partial<Record<keyof IOrder, string>>;
+type FormErrorsType = Partial<Record<keyof IOrderDetails, string>>;
+
+// Интерфейс описывает структуру объекта с методом для обработки кликов на карточке товара
+interface ICardActions {
+  onClick (): void;
+}
+
+// Интерфейс описывает контент модального окна
+interface IModalData {
+  content: HTMLElement;
+}
+
+// Интерфейс описывает главную страницу
+interface IPage {
+  catalog: HTMLElement[],
+  counter: number, 
+  locked: boolean
+}
 
 export {
-  IAppData, IProduct, ICatalog, IBasket, IOrderForm, PaymentType, 
-  IContactsForm, IOrder, IOrderSuccess, IApiError, FormErrorsType
+  IAppData, IProduct, IOrderForm, PaymentType, ICardActions, IFormValid, IModalData, IPage, ISuccess,
+  IContactsForm, IOrderDetails, IOrderRequest, IOrderSuccess, IApiError, FormErrorsType, IWebLarekApi
 }
 
 

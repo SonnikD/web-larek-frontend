@@ -1,16 +1,14 @@
-import { FormErrorsType, IAppData, IContactsForm, IOrder, IOrderForm, IProduct, PaymentType } from "../../types";
+import { FormErrorsType, IAppData, IContactsForm, IOrderDetails, IOrderForm, IProduct, PaymentType } from "../../types";
 import { IEvents } from "../base/events";
 
 export class AppData implements IAppData {
   catalog: IProduct[] = [];
-  basket: IProduct[] = [];
-  order: IOrder = {
+  basket: string[];
+  order: IOrderDetails = {
     payment: 'online',
     address: '', 
     email: '',
-    phone: '',
-    total: 0, 
-    items: []
+    phone: ''
   };
   formErrors: FormErrorsType = {};
   preview: IProduct | null;
@@ -18,19 +16,27 @@ export class AppData implements IAppData {
   protected events: IEvents;
 
   constructor(events: IEvents) {
+    this.catalog = [];
+    this.basket = []; 
+    this.order = {
+        payment: 'online',
+        address: '',
+        email: '',
+        phone: ''
+    };
+    this.formErrors = {};
     this.events = events;
   }
 
   // Добавить товар в корзину
   addToBasket(item: IProduct): void {
-    this.basket.push(item);
-    this.order.items.push(item.id)
+    this.basket.push(item.id);
     this.events.emit('basket:change', this.basket)
   }
 
   // Удалить товар из корзины
   removeFromBasket(item: IProduct): void {
-    this.basket = this.basket.filter((product) => product.id != item.id)
+    this.basket = this.basket.filter((id) => id != item.id)
     this.events.emit('basket:change', this.basket)
   }
 
@@ -42,16 +48,15 @@ export class AppData implements IAppData {
 
   // Вычислить общую сумму товаров в корзине
   getTotal(): number {
-    this.order.total = this.basket.reduce((accum, product) => {
-     return product.price + accum;
-    }, 0)
-    return this.order.total
-    
+    return this.basket.reduce((accum, id) => {
+      const product = this.catalog.find((item) => item.id === id);
+      return accum + (product?.price || 0);
+    }, 0);
   }
-
+  
   // Проверить, есть ли товар в корзине
   isInBasket(product: IProduct): boolean {
-    return this.basket.some((item) => item.id === product.id)
+    return this.basket.some((id) => id === product.id)
   }
 
   // Загрузить список товаров (каталог)
@@ -72,7 +77,7 @@ export class AppData implements IAppData {
   // Сохранить данные формы заказа
   setOrderForm(field: keyof IOrderForm, value: string): void {
     if (field === "payment" && (value === 'online' || value === "onDelivery")) {
-      this.order[field] = value;
+      this.order[field] = value as PaymentType;
     } else if (field !== "payment") {
       this.order[field] = value;
     }
@@ -119,9 +124,8 @@ export class AppData implements IAppData {
       payment: 'online',
       address: '', 
       email: '',
-      phone: '',
-      total: 0, 
-      items: []
+      phone: ''
     }
     }
+    
   }
